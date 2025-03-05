@@ -464,7 +464,7 @@
             });
 
             // 二分查找快速检测
-            let low = 1, high = 100, lastValid = 0;
+            let low = 1, high = 5, lastValid = 0;
             while (low <= high) {
                 const mid = Math.floor((low + high) / 2);
                 const exists = await checkImage(mid);
