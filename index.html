@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试2</title> <!-- 页面标题 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Helvetica Neue", Arial, sans-serif
+        }
+
+        /* 合并容器样式 */
+        .container {
+            width: calc(100% - 40px);
+            margin: 0 auto;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            border-bottom: 1.4px solid #000;
+            padding-bottom: 15px;
+        }
+
+        .container.visible {
+            opacity: 1
+        }
+
+        /* 合并网格布局 */
+        .grid-container,
+        .grid-container2,
+        .grid-container3 {
+            display: grid;
+            gap: 40px;
+            padding: 10px;
+        }
+
+        .grid-container {
+            grid-template-columns: repeat(2, 1fr)
+        }
+
+        .grid-container2 {
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr))
+        }
+
+        .grid-container3 {
+            grid-template-columns: repeat(2, 1fr)
+        }
+
+        /* 合并导航样式 */
+        .nav-bar,
+        .nav-hamburger {
+            display: flex;
+            padding-top: 10px;
+
+            div {
+                cursor: pointer;
+                position: relative;
+                padding-right: 10px;
+                font-size: 16px;
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    left: 50%;
+                    bottom: 0;
+                    width: 0;
+                    height: 2px;
+                    background: #000;
+                    transition: all .3s ease-out;
+                    transform: translateX(-50%);
+                }
+
+                &:hover::after {
+                    width: 100%
+                }
+            }
+        }
+
+        .nav-hamburger {
+            display: none;
+            justify-content: flex-end
+        }
+
+        /* 合并响应式 */
+        @media (max-width:720px) {
+            .nav-bar {
+                display: none
+            }
+
+            .nav-hamburger {
+                display: flex
+            }
+
+            .grid-container3 {
+                grid-template-columns: 1fr
+            }
+
+            .pic1 {
+                justify-self: end
+            }
+        }
+
+        .multi-column-container {
+            column-count: 2;
+            column-gap: 15px
+        }
+
+        .text1 {
+            font-size: 28pt
+        }
+
+        /* 合并滑动组件 */
+        .slider-container {
+            position: relative;
+            max-width: 1600px;
+            margin: 20px auto
+        }
+
+        .slider-track {
+            display: flex;
+            transition: transform .5s cubic-bezier(.25, .46, .45, .94);
+            padding: 0 10px;
+            gap: 10px;
+        }
+
+        .image-item {
+            flex: 0 0 calc(100% - 20px);
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+            aspect-ratio: 3/4;
+            cursor: pointer;
+            background: #f0f0f0;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: opacity .3s;
+            }
+        }
+
+        /* 合并媒体查询 */
+        @media (min-width:768px) {
+            .slider-track {
+                padding: 0 20px;
+                gap: 20px
+            }
+
+            .image-item {
+                flex-basis: calc(33.333% - 20px)
+            }
+        }
+
+        @media (min-width:1280px) {
+            .image-item {
+                flex-basis: calc(25% - 15px)
+            }
+        }
+
+        /* 合并按钮样式 */
+        .slider-btn,
+        .close-btn {
+            position: absolute;
+            background: rgba(0, 0, 0, .7);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .slider-btn {
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 12px 18px;
+
+            &.prev-btn {
+                left: 20px
+            }
+
+            &.next-btn {
+                right: 20px
+            }
+
+            &:hover {
+                background: rgba(0, 0, 0, .9);
+                transform: translateY(-50%) scale(1.05)
+            }
+        }
+
+        .close-btn {
+            top: 30px;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+
+            &:hover {
+                background-color: rgba(0, 0, 0, .9);
+                transform: scale(1.1)
+            }
+        }
+
+        .preview-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .95);
+            display: grid;
+            place-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s;
+            z-index: 1000;
+
+            &.active {
+                opacity: 1;
+                visibility: visible;
+
+                .preview-image {
+                    transform: scale(1)
+                }
+            }
+        }
+
+        .preview-image {
+            max-width: 90%;
+            max-height: 90%;
+            transform: scale(0.95);
+            transition: transform .3s
+        }
+
+        .error-placeholder {
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 12px;
+
+            p {
+                margin: 0 0 8px;
+                font-size: 18px
+            }
+
+            small {
+                font-size: 14px;
+                color: #999
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div
+        style="position: fixed;width: 100%;background-color: rgba(255, 255, 255, 0.385);backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);z-index: 10;">
+        <div class="container grid-container" style="border-bottom: 0;">
+            <div id="t1"
+                style="font-size: clamp(30px, 3.8vw, 46px);white-space: nowrap;padding: 6px;font-weight: bold;">
+                ¥Hello!我是momo¥
+            </div>
+            <div class="nav-bar" >
+                <div href="#section1">简介</div>
+                <div href="#section2">履历</div>
+                <div href="#section1">技能</div>
+                <div href="#section1">作品</div>
+            </div>
+            <div class="nav-hamburger">
+                <div>菜单</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container grid-container" style="border-bottom: 1.4px solid black;padding-bottom: 15px;">
+        <div></div>
+        <div style="display: grid; width: 100%;height: 440px;">
+            <div class="pic1"
+                style=" width: 150px;height: 210px;align-self: end;justify-items: center;align-items: center;">
+                <img style="width: 100%;height: 100%; object-fit: cover;" src="pic1.png" alt="">
+            </div>
+        </div>
+    </div>
+
+    <div id="section1" class="container grid-container2" style="border-bottom: 1.4px solid black;padding-bottom: 15px;">
+        <div id="t2" class="multi-column-container" style="margin-top: 15px;"></div>
+        <div style="display: grid; min-height: 300px;align-items: space-between;margin-top: 15px;">
+            <div id="t3" class="multi-column-container" style="margin-bottom: 60px;">
+            </div>
+            <div style="align-self: end;">
+                <div id="t4" style="width: calc(50% - 15px);margin-bottom: 10px;"></div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div id="section2" class="container grid-container3" style="border-bottom: 1.4px solid black;padding-bottom: 15px;">
+        <div id="t5" class="text1" style="margin-top: 15px;"> </div>
+        <div id="t6" class="text1 pic1" style="margin-top: 15px;"> </div>
+        <div id="t7" class="text1" style="margin-top: 15px;"></div>
+        <div id="t8" class="text1 pic1" style="margin-top: 15px;"></div>
+        <div id="t9" class="text1" style="margin-top: 15px;"></div>
+        <div id="t10" class="text1 pic1" style="margin-top: 15px;"></div>
+        <div id="t11" class="text1" style="margin-top: 15px;"></div>
+        <div id="t12" class="text1 pic1" style="margin-top: 15px;"></div>
+    </div>
+    <div id="section2" class="container grid-container3" style="border-bottom: 1.4px solid black;padding-bottom: 15px;">
+        <div id="t5" class="text1" style="margin-top: 15px;"> </div>
+        <div id="t6" class="text1 pic1" style="margin-top: 15px;"> </div>
+
+    </div>
+    <div class="slider-container">
+        <div class="slider-track"></div>
+        <button class="slider-btn prev-btn">←</button>
+        <button class="slider-btn next-btn">→</button>
+    </div>
+
+    <div class="preview-overlay" id="previewOverlay">
+        <span class="close-btn">&times;</span>
+        <img class="preview-image" id="previewImage">
+    </div>
+    <div id="myDiv" style="display: none;">【1】Hello！我是momo
+        【2】简单介绍
+        【3】我是毕业于我是毕业于我是毕业于我是毕业于我是毕业于我是毕业于我是毕业于我是毕业于我是毕业于我是毕业于
+        【4】联系我&nbsp;:-）&#10;&#10;邮箱：taokw888@163.com
+        【5】18-22
+        【6】蓝翔高级技工学校&#10;-&nbsp;挖掘机
+        【7】22-23
+        【8】蓝翔高级技工学校&#10;-&nbsp;美容美发
+        【9】23-24
+        【10】蓝翔高级技工学校&#10;-&nbsp;汽修
+        【11】
+        【12】
+    </div>
+    <div id="carouselData" style="display: none;">
+        https://s3.bmp.ovh/imgs/2025/03/05/bb12401603b0af86.png
+https://s3.bmp.ovh/imgs/2025/03/05/8e9e3beb0a8aedc2.png
+https://s3.bmp.ovh/imgs/2025/03/05/dae40f7535734b1b.png
+https://s3.bmp.ovh/imgs/2025/03/05/f1d03b10f18e468e.png
+https://s3.bmp.ovh/imgs/2025/03/05/d99dd1a70360265d.png
+https://s3.bmp.ovh/imgs/2025/03/05/e5967bc149724699.png
+https://s3.bmp.ovh/imgs/2025/03/05/1de855d6f7c16f18.png
+
+    </div>
+    <script>
+        // 循环指定的 div id 数组
+        let divIds = Array.from({ length: 12 }, (_, i) => `t${i + 1}`);
+
+        let divElement = document.getElementById("myDiv");
+        // 获取纯文本内容
+        let textContent = divElement.innerText;
+        console.log(textContent);
+        // 包含递增序号作为分隔符的文本
+        let text = textContent;
+
+        // 使用正则表达式拆分文本，匹配形如 "¥数字¥" 的分隔符
+        let parts = text.split(/【\d+】/);
+
+        // 如果分割后第一个元素为空字符串，则去除（因为文本以分隔符开头）
+        if (parts[0] === "") {
+            parts.shift();
+        }
+
+        // 将拆分后的内容分别赋值到对应的 div 中
+        for (let i = 0; i < parts.length; i++) {
+            let div = document.getElementById(divIds[i]);
+            if (div) {
+                div.innerText = parts[i];
+            }
+        }
+
+        divIds.forEach(function (id) {
+            var elem = document.getElementById(id);
+            // 如果元素存在并且其文本内容（去除空格后）为空，则隐藏该元素
+            if (elem && !elem.textContent.trim()) {
+                elem.style.display = 'none';
+            }
+        });
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 核心配置
+        const CONFIG = {
+            dataContainer: '#carouselData', // 数据容器
+            trackSelector: '.slider-track', // 轮播轨道
+            itemClass: 'image-item',        // 项类名
+            autoPlay: true,                // 自动播放
+            cloneThreshold: 3              // 克隆节点最小数量
+        };
+    
+        // DOM 元素
+        const elements = {
+            track: document.querySelector(CONFIG.trackSelector),
+            prevBtn: document.querySelector('.prev-btn'),
+            nextBtn: document.querySelector('.next-btn'),
+            preview: {
+                overlay: document.getElementById('previewOverlay'),
+                image: document.getElementById('previewImage'),
+                close: document.querySelector('.close-btn')
+            }
+        };
+    
+        // 状态管理
+        const state = {
+            currentIndex: 1,
+            isAnimating: false,
+            itemWidth: 0,
+            gap: 0,
+            imageList: [],
+            timer: null
+        };
+    
+        /* 修改后的数据加载函数 */
+        const loadImageData = () => {
+            try {
+                const dataElement = document.querySelector(CONFIG.dataContainer);
+                return dataElement.textContent
+                    .trim() // 去除首尾空白
+                    .split(/\r?\n/) // 兼容不同系统的换行符
+                    .filter(url => url.trim() !== ''); // 过滤空行
+            } catch (error) {
+                console.error('数据加载失败:', error);
+                return [];
+            }
+        };
+    
+        /* 核心功能 */
+        const createCarouselItem = (imgUrl, index) => {
+            const item = document.createElement('div');
+            item.className = CONFIG.itemClass;
+            
+            const img = new Image();
+            img.alt = `轮播项 ${index + 1}`;
+            img.src = imgUrl;
+            
+            img.onerror = () => {
+                img.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+                img.style.opacity = 0.5;
+            };
+    
+            item.addEventListener('click', () => {
+                elements.preview.image.src = imgUrl;
+                elements.preview.overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+    
+            item.appendChild(img);
+            return item;
+        };
+    
+        const generateClones = (list) => {
+            if (list.length < CONFIG.cloneThreshold) return list;
+            return [
+                createCarouselItem(list[list.length - 1], list.length - 1),
+                ...list.map((url, i) => createCarouselItem(url, i)),
+                createCarouselItem(list[0], 0)
+            ];
+        };
+    
+        /* 轮播控制 */
+        const calculateDimensions = () => {
+            if (!elements.track.children.length) return;
+            state.itemWidth = elements.track.children[0].offsetWidth;
+            state.gap = parseInt(getComputedStyle(elements.track).gap) || 0;
+        };
+    
+        const updateSlider = (animate = true) => {
+            if (state.isAnimating || !state.imageList.length) return;
+            state.isAnimating = true;
+    
+            const translateX = -state.currentIndex * (state.itemWidth + state.gap);
+            elements.track.style.transform = `translateX(${translateX}px)`;
+            elements.track.style.transition = animate ? 
+                'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none';
+    
+            setTimeout(() => {
+                if (state.currentIndex === 0) {
+                    state.currentIndex = state.imageList.length;
+                    elements.track.style.transition = 'none';
+                    elements.track.style.transform = 
+                        `translateX(-${state.currentIndex * (state.itemWidth + state.gap)}px)`;
+                }
+                else if (state.currentIndex > state.imageList.length) {
+                    state.currentIndex = 1;
+                    elements.track.style.transition = 'none';
+                    elements.track.style.transform = 
+                        `translateX(-${state.currentIndex * (state.itemWidth + state.gap)}px)`;
+                }
+                state.isAnimating = false;
+            }, 500);
+        };
+    
+        /* 事件处理 */
+        const bindControls = () => {
+            elements.prevBtn.addEventListener('click', () => {
+                if (!state.isAnimating) {
+                    state.currentIndex--;
+                    updateSlider();
+                }
+            });
+    
+            elements.nextBtn.addEventListener('click', () => {
+                if (!state.isAnimating) {
+                    state.currentIndex++;
+                    updateSlider();
+                }
+            });
+    
+            let touchStartX = 0;
+            elements.track.addEventListener('touchstart', e => {
+                touchStartX = e.touches[0].clientX;
+            });
+    
+            elements.track.addEventListener('touchend', e => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const deltaX = touchStartX - touchEndX;
+    
+                if (Math.abs(deltaX) > state.itemWidth * 0.15) {
+                    deltaX > 0 ? state.currentIndex++ : state.currentIndex--;
+                    updateSlider();
+                }
+            });
+    
+            elements.preview.close.addEventListener('click', () => {
+                elements.preview.overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+    
+            elements.preview.overlay.addEventListener('click', (e) => {
+                if (e.target === elements.preview.overlay) {
+                    elements.preview.overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        };
+    
+        /* 初始化流程 */
+        const initCarousel = () => {
+            state.imageList = loadImageData();
+            
+            if (!state.imageList.length) {
+                elements.track.innerHTML = `
+                    <div class="error-placeholder">
+                        <p>⚠️ 没有可用的图片数据</p>
+                        <small>请检查 ${CONFIG.dataContainer} 的内容</small>
+                    </div>
+                `;
+                elements.prevBtn.style.display = 'none';
+                elements.nextBtn.style.display = 'none';
+                return;
+            }
+    
+            elements.track.append(...generateClones(state.imageList));
+            
+            const shouldShowControls = state.imageList.length > 1;
+            elements.prevBtn.style.display = shouldShowControls ? 'block' : 'none';
+            elements.nextBtn.style.display = shouldShowControls ? 'block' : 'none';
+    
+            calculateDimensions();
+            updateSlider(false);
+    
+            window.addEventListener('resize', () => {
+                calculateDimensions();
+                updateSlider(false);
+            });
+        };
+    
+        // 启动
+        bindControls();
+        initCarousel();
+    });
+    </script>
+
+    <script>
+        // 导航栏点击滚动处理（带导航栏高度偏移）
+        const navLinks = document.querySelectorAll('.nav-bar div');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                // 获取导航栏高度（假设导航栏高度不变）
+                const navBarHeight = document.querySelector('.nav-bar').offsetHeight;
+                // 计算目标元素的绝对位置减去导航栏高度
+                const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navBarHeight;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // 设置 IntersectionObserver 监听滚动进入和离开
+        const sections = document.querySelectorAll('.container');
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible'); // 元素进入视口时，渐现
+                } else {
+                    entry.target.classList.remove('visible'); // 元素离开视口时，渐隐
+                }
+            });
+        }, {
+            threshold: 0.5 // 设置阈值为50%，即元素至少50%可见时触发
+        });
+
+        sections.forEach(section => {
+            observer.observe(section); // 观察每个section
+        });
+    </script>
+
+
+
+
+</body>
+
+</html>
