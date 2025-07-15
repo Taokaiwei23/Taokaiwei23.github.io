@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>钥匙圈模拟</title>
+  <style>
+    body { margin:0; overflow:hidden; }
+    #container { position: relative; width: 800px; height: 600px; background: #f0f0f0; }
+    .key {
+      position: absolute;
+      width: 80px;   /* 钥匙长度 */
+      height: 20px;  /* 钥匙厚度 */
+      background: #ffcc00;
+      border-radius: 4px;
+      transform-origin: top left;
+    }
+    #ring {
+      position: absolute;
+      width: 80px;   /* 钥匙圈直径 */
+      height: 80px;
+      border: 4px solid #888;
+      border-radius: 50%;
+      top: 260px; left: 360px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="ring"></div>
+    <!-- 钥匙 div 会由脚本动态挂载 -->
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+  <script>
+    const { Engine, Render, Runner, Bodies, Constraint, Composite, MouseConstraint, Mouse } = Matter;
+
+    // 1. 初始化引擎
+    const engine = Engine.create();
+    const world = engine.world;
+
+    // 2. 创建环形刚体（静态）
+    const ringX = 400, ringY = 300, ringRadius = 40;
+    const ring = Bodies.circle(ringX, ringY, ringRadius, { isStatic: true });
+    Composite.add(world, ring);
+
+    // 3. 钥匙参数
+    const keyCount = 5;
+    const keyLength = 80, keyThickness = 20;
+    const baseAngleStep = (Math.PI * 2) / keyCount;
+
+    // 存储 div 和 body 的对应关系
+    const keys = [];
+
+    for (let i = 0; i < keyCount; i++) {
+      // 3.1 位置：分散在环周围
+      const angle = i * baseAngleStep - Math.PI/2;
+      const x = ringX + Math.cos(angle) * (ringRadius + keyLength/2);
+      const y = ringY + Math.sin(angle) * (ringRadius + keyLength/2);
+
+      // 3.2 创建刚体
+      const body = Bodies.rectangle(x, y, keyLength, keyThickness, {
+        frictionAir: 0.02,
+        collisionFilter: { group: -1 }  // 同组不互相碰撞
+      });
+      Composite.add(world, body);
+
+      // 3.3 铰链约束：钥匙顶部连到 ring 周边某点
+      const pivot = {
+        x: ringX + Math.cos(angle) * ringRadius,
+        y: ringY + Math.sin(angle) * ringRadius
+      };
+      const hinge = Constraint.create({
+        pointA: pivot,
+        bodyB: body,
+        pointB: { x: -keyLength/2, y: 0 },
+        stiffness: 0.7,
+        length: 0
+      });
+      Composite.add(world, hinge);
+
+      // 3.4 创建对应的 div
+      const div = document.createElement('div');
+      div.className = 'key';
+      document.getElementById('container').appendChild(div);
+
+      keys.push({ body, div });
+    }
+
+    // 4. 鼠标交互
+    const mouse = Mouse.create(document.getElementById('container'));
+    const mConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: { stiffness: 0.2, render: { visible: false } }
+    });
+    Composite.add(world, mConstraint);
+
+    // 5. 同步渲染：每帧把 body 的位置、角度更新到 div
+    (function update() {
+      requestAnimationFrame(update);
+      keys.forEach(({ body, div }) => {
+        const { x, y } = body.position;
+        const angle = body.angle;
+        div.style.transform = `
+          translate(${x - keyLength/2}px, ${y - keyThickness/2}px)
+          rotate(${angle}rad)
+        `;
+      });
+    })();
+
+    // 6. 启动模拟
+    Runner.run(Runner.create(), engine);
+  </script>
+</body>
+</html>

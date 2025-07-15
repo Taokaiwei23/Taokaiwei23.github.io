@@ -1,0 +1,140 @@
+ .backgroundcolor {
+     left: 0;
+     top: 0;
+     width: 100vw;
+     height: 100vh;
+     --deg-0: 90deg;
+     --color-1: rgb(243, 243, 243);
+     --color-2: rgb(243, 243, 243);
+     --color-3: rgb(7, 19, 31);
+     --color-4: rgb(7, 19, 31);
+     --color-5: rgb(65, 43, 29);
+     --deg-1: 0deg;
+     --deg-2: 0deg;
+     --deg-3: 180deg;
+     --deg-4: 269deg;
+     --deg-5: 360deg;
+     background: conic-gradient(from var(--deg-0),
+             var(--color-1) var(--deg-1),
+             var(--color-2) var(--deg-2),
+             var(--color-3) var(--deg-3),
+             var(--color-4) var(--deg-4),
+             var(--color-5) var(--deg-5));
+     position: absolute;
+     z-index: -999;
+ }
+
+ .container {
+     display: grid;
+     grid-template-columns: repeat(2, 1fr);
+     grid-template-rows: repeat(2, 1fr);
+     width: 100vw;
+     height: 100vh;
+     z-index: 999;
+ }
+
+ .logo {
+     margin: 10px;
+     position: absolute;
+     width: 50vw;
+     height: 50vh;
+     mix-blend-mode: difference;
+     display: grid;
+     place-items: center;
+
+ }
+ .logo2 {
+     position: absolute;
+     display: grid;
+     place-items: center;
+     opacity: 0;
+ }
+ .logo2>* {
+     grid-area: 1 / 1;
+ }
+ .logo>* {
+     grid-area: 1 / 1;
+ }
+
+ .logo1svg {
+
+     width: 28vw;
+     height: 28vh;
+   
+ }
+ 
+ .logo2svg {
+
+     width: 20vw;
+     height: 20vh;
+
+ }
+
+ .bt0 {
+     --weight-0: 300;
+     color: white;
+     mix-blend-mode: difference;
+     font-size: 14pt;
+     padding: 0.8rem;
+     letter-spacing: 0.2rem;
+     position: absolute;
+     font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+     font-optical-sizing: auto;
+     font-weight: var(--weight-0);
+     font-style: normal;
+     
+     
+
+ }
+
+ @font-face {
+     font-family: 'NotoSansSC-VariableFont_wght';
+     src: url('fonts/NotoSansSC-VariableFont_wght.ttf') format('truetype-variations');
+     font-weight: 100 900;
+
+ }
+
+ @media (max-width: 600px) {
+     /* .bt0 {
+         font-size: clamp(14pt, 3.5vw + 1pt, 20pt);
+         padding: 1rem
+     } */
+
+     /* .logo1svg {
+         width: 50vw;
+         height: 50vh;
+         transform: rotate(-22deg);
+     } */
+ }
+
+ .card {
+  transform-style: preserve-3d;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.8rem;
+  transform-origin: 50% 105% 0px;
+  background-color:rgb(214, 214, 214);
+  box-shadow: 0 .125em .75em 1px rgba(0,0,0,.05),
+              0 0 .125em 1px rgba(0,0,0,.1);
+}
+
+.card > div {
+  transform-style: preserve-3d;
+  position: absolute;
+ 
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  border-radius: inherit;
+}
+
+.xx {
+  display: flex;
+  position: fixed;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
