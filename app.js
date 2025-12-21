@@ -1,4 +1,4 @@
-import { createTimeline, utils, animate, stagger, svg } from './node_modules/animejs/lib/anime.esm.min.js';
+import { createTimeline, utils, animate, stagger, svg } from './anime.esm.min.js';
 
 // 设置初始样式变量
 utils.set('.backgroundcolor', {
