@@ -1,4 +1,4 @@
-import { createTimeline, utils, waapi, animate, stagger, svg } from './node_modules/animejs/lib/anime.esm.min.js';
+import { createTimeline, utils, waapi, animate, stagger, svg } from './anime.esm.min.js';
 
 utils.set('.backgroundcolor', {
   '--deg-0': '90deg',
@@ -764,3 +764,4 @@ $lx3.addEventListener('click', reversezcTimeline);
 $al2.addEventListener('click', reversezcTimeline);
 $al3.addEventListener('click', reversezcTimeline);
 $homelogo.addEventListener('click', reversezcTimeline);
+
