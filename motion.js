@@ -1,4 +1,4 @@
-import { createTimeline, utils, waapi, animate, stagger, svg } from './anime.esm.min.js';
+import { createTimeline, utils, waapi, animate, stagger, svg } from './node_modules/animejs/lib/anime.esm.min.js';
 
 utils.set('.backgroundcolor', {
   '--deg-0': '90deg',
@@ -378,7 +378,7 @@ $al.onclick = () => {
   $homelogo.onclick = homelogoClick;
   $homelogo.onmouseenter = homelogoMouseEnter;
   $homelogo.onmouseout = homelogoMouseOut;
-  // $zc.removeEventListener('click', playTimeline);
+  $zc.removeEventListener('click', playzcTimeline);
   $lx.removeEventListener('click', playlxTimeline);
 }
 $al2.onclick = $al3.onclick = $al.onclick;
@@ -459,7 +459,7 @@ $lx.onclick = () => {
   $homelogo.onmouseenter = homelogoMouseEnter;
   $homelogo.onmouseout = homelogoMouseOut;
   $al.removeEventListener('click', playTimeline);
-  // $zc.removeEventListener('click', playTimeline);
+  $zc.removeEventListener('click', playzcTimeline);
   
 }
 $lx2.onclick = $lx3.onclick = $lx.onclick;
@@ -568,6 +568,7 @@ $homelogo.onclick = () => {
   $hellologo.onclick = hellologoClick;
   $al.addEventListener('click', playTimeline, { once: true });
   $lx.addEventListener('click', playlxTimeline, { once: true });
+  $zc.addEventListener('click', playzcTimeline, { once: true });
 }
 const homelogoClick = $homelogo.onclick;
 
@@ -595,12 +596,12 @@ const lxcardline = createTimeline({
   }, '<<')
   .add('#lx_ys', {
     opacity: [0, 1],
-    rotate: [-90, 50],
+    rotate: [0, 50],
     duration: 400,
   }, '<<')
   .add('#lx_mp', {
     opacity: [0, 1],
-    rotate: [-90, 0],
+    rotate: [0, 0],
     duration: 400,
   }, '<<')
   .add('#lx_yk', {
@@ -695,5 +696,71 @@ $lx3.addEventListener('click', reverseTimeline);
 $homelogo.addEventListener('click', reverseTimeline);
 
 
+//专长页面内容事件
 
+const zccardline = createTimeline({
+  autoplay: false,
+  loop: false,
 
+})
+  .add('#zcbox', {
+
+    
+    opacity: [0, 1],
+    duration: 500,
+    ease: 'outBack',
+    'pointer-events': 'auto',
+  },)
+  // [迭代-v01] 在 zctimeline 内直接控制切线 SVG 透明度
+  .add('.qiexian-svg-layer', {
+    opacity: [0, 1],
+    duration: 500,
+    ease: 'outQuart',
+  }, '<<')
+  .add('#zcyuan1', {
+      rotate: [180, 270],
+      x: 100,
+      opacity: [0, 1],
+    }, '<<')
+    .add('#zcyuan3', {
+      rotate: [0, 45],
+      x: 200,
+      opacity: [0, 1],
+    }, '<<')
+    .add('#zcyuan2', {
+      rotate: [90, 125],
+      x: 200,
+      opacity: [0, 1],
+    }, '<<')
+   .add('.zxyuan3', {
+      
+      rotate: -45,
+    }, '<<')
+    .add('.zxyuan1', {
+      
+      rotate: -90,
+    }, '<<')
+    .add('.zxyuan2', {
+      
+      rotate: -35,
+    }, '<<')
+    
+    .add('#zcyuan1icon', {
+      rotate: [0, -45],
+    }, '<<')
+    .add('.dash-border', {
+      rotate: [0, -45],
+    }, '<<')
+  
+
+const playzcTimeline = () => zccardline.play();
+const reversezcTimeline = () => zccardline.reverse();
+
+$zc.addEventListener('click', playzcTimeline, { once: true });
+$zc2.addEventListener('click', playzcTimeline);
+$zc3.addEventListener('click', playzcTimeline);
+$lx2.addEventListener('click', reversezcTimeline);
+$lx3.addEventListener('click', reversezcTimeline);
+$al2.addEventListener('click', reversezcTimeline);
+$al3.addEventListener('click', reversezcTimeline);
+$homelogo.addEventListener('click', reversezcTimeline);
