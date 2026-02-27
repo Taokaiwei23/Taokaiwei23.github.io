@@ -26,8 +26,44 @@
         </svg>
     </div>
 
-    <div class="scale-wrapper">
-        <div id="lxbox" style="top: 50%;left: calc( 50% - 220px );position: fixed;transform-origin: 0% 50%;opacity: 0;pointer-events:none">
+
+    <div id="zcbox" style="opacity: 0;pointer-events:none;">
+
+        <div id="zcyuan1" class="zcyuan" style="transform-origin: 50% 0%;mix-blend-mode: difference;">
+            <div id="zcyuan1icon" class="123" style="color: #ffffff;">+</div>
+            <div class="xxyuan">
+                <svg viewBox="0 0 200 200" class="dash-border">
+                    <circle cx="100" cy="100" r="98" />
+                </svg>
+            </div>
+            <div id="zxyuan1" class="zxyuan1"></div>
+        </div>
+        <div id="zcyuan2" class="zcyuan" style="transform-origin: 50% 0%;mix-blend-mode: difference;">
+            <div id="zcyuan2icon" class="123" style="color: #ffffff;">+</div>
+            <div class="xxyuan">
+                <svg viewBox="0 0 200 200" class="dash-border">
+                    <circle cx="100" cy="100" r="98" />
+                </svg>
+            </div>
+            <div id="zxyuan2" class="zxyuan2"></div>
+        </div>
+        <div id="zcyuan3" class="zcyuan" style="transform-origin: 50% 0%;mix-blend-mode: difference;">
+            <div id="zcyuan3icon" class="123" style="color: #ffffff;">+</div>
+            <div class="xxyuan">
+                <svg viewBox="0 0 200 200" class="dash-border">
+                    <circle cx="100" cy="100" r="98" />
+                </svg>
+            </div>
+            <div id="zxyuan3" class="zxyuan3"></div>
+        </div>
+
+    </div>
+
+
+
+    <div id="scale-wrapper" class="scale-wrapper">
+        <div id="lxbox"
+            style="top: 50%;left: calc( 50% - 220px );position: fixed;transform-origin: 0% 50%;opacity: 0;pointer-events:none;">
             <div class="huanzx"
                 style="left:  calc( 50% - 50px );position: fixed; border-radius: 100px;width: 100px;height: 100px;border: 1px solid #ADADAD;">
             </div>
@@ -290,20 +326,26 @@
         <div></div>
         <div id="zc">
             <div class="bt0" id="zc-title" style="pointer-events: none">专长</div>
+
         </div>
         <div id="al">
             <div class="bt0" id="al-title" style="pointer-events: none">案例</div>
         </div>
         <div id="lx">
             <div class="bt0" id="lx-title" style="pointer-events: none">联系</div>
+
         </div>
 
     </div>
 
     <div class="backgroundcolor"></div>
-
+    <script src="qiexian.js"></script>
+     <!-- <script type="module" src="./main.js"></script> -->
     <script type="module" src="motion.js"></script>
     <script type="module" src="layout.js"></script>
+    <!-- <script type="module" src="zcyuan.js"></script> -->
+
+
     <!-- <script type="module" src="test.js"></script> -->
 
 </body>
