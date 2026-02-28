@@ -721,35 +721,43 @@ const zccardline = createTimeline({
       rotate: [180, 270],
       x: 100,
       opacity: [0, 1],
+      duration: 400,
     }, '<<')
     .add('#zcyuan3', {
       rotate: [0, 45],
       x: 200,
       opacity: [0, 1],
+      duration: 400,
     }, '<<')
     .add('#zcyuan2', {
       rotate: [90, 125],
       x: 200,
       opacity: [0, 1],
+      duration: 400,
     }, '<<')
    .add('.zxyuan3', {
       
       rotate: -45,
+      duration: 400,
     }, '<<')
     .add('.zxyuan1', {
       
       rotate: -90,
+      duration: 400,
     }, '<<')
     .add('.zxyuan2', {
       
       rotate: -35,
+      duration: 400,
     }, '<<')
     
     .add('#zcyuan1icon', {
       rotate: [0, -45],
+      duration: 400,
     }, '<<')
     .add('.dash-border', {
       rotate: [0, -45],
+      duration: 400,
     }, '<<')
   
 
@@ -764,5 +772,6 @@ $lx3.addEventListener('click', reversezcTimeline);
 $al2.addEventListener('click', reversezcTimeline);
 $al3.addEventListener('click', reversezcTimeline);
 $homelogo.addEventListener('click', reversezcTimeline);
+
 
 
