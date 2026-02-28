@@ -707,14 +707,14 @@ const zccardline = createTimeline({
 
     
     opacity: [0, 1],
-    duration: 500,
+    duration: 400,
     ease: 'outBack',
     'pointer-events': 'auto',
   },)
   // [迭代-v01] 在 zctimeline 内直接控制切线 SVG 透明度
   .add('.qiexian-svg-layer', {
     opacity: [0, 1],
-    duration: 500,
+    duration: 400,
     ease: 'outQuart',
   }, '<<')
   .add('#zcyuan1', {
@@ -764,4 +764,5 @@ $lx3.addEventListener('click', reversezcTimeline);
 $al2.addEventListener('click', reversezcTimeline);
 $al3.addEventListener('click', reversezcTimeline);
 $homelogo.addEventListener('click', reversezcTimeline);
+
 
