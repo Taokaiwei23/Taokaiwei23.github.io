@@ -1,0 +1,1397 @@
+/* [迭代-v26] 注册动画用 CSS 自定义属性，让浏览器在合成器线程插值，避免每帧主线程重算 conic-gradient */
+@property --deg-0 {
+    syntax: '<angle>';
+    initial-value: 90deg;
+    inherits: false;
+}
+@property --deg-1 {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+@property --deg-2 {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+@property --deg-3 {
+    syntax: '<angle>';
+    initial-value: 180deg;
+    inherits: false;
+}
+@property --deg-4 {
+    syntax: '<angle>';
+    initial-value: 269deg;
+    inherits: false;
+}
+@property --deg-5 {
+    syntax: '<angle>';
+    initial-value: 360deg;
+    inherits: false;
+}
+@property --color-1 {
+    syntax: '<color>';
+    initial-value: rgb(243, 243, 243);
+    inherits: false;
+}
+@property --color-2 {
+    syntax: '<color>';
+    initial-value: rgb(243, 243, 243);
+    inherits: false;
+}
+@property --color-3 {
+    syntax: '<color>';
+    initial-value: rgb(7, 19, 31);
+    inherits: false;
+}
+@property --color-4 {
+    syntax: '<color>';
+    initial-value: rgb(7, 19, 31);
+    inherits: false;
+}
+@property --color-5 {
+    syntax: '<color>';
+    initial-value: rgb(65, 43, 29);
+    inherits: false;
+}
+
+ .backgroundcolor {
+     left: 0;
+     top: 0;
+     width: 100vw;
+     height: 100vh;
+     --deg-0: 90deg;
+     --color-1: rgb(243, 243, 243);
+     --color-2: rgb(243, 243, 243);
+     --color-3: rgb(7, 19, 31);
+     --color-4: rgb(7, 19, 31);
+     --color-5: rgb(65, 43, 29);
+     --deg-1: 0deg;
+     --deg-2: 0deg;
+     --deg-3: 180deg;
+     --deg-4: 269deg;
+     --deg-5: 360deg;
+     background: conic-gradient(from var(--deg-0),
+             var(--color-1) var(--deg-1),
+             var(--color-2) var(--deg-2),
+             var(--color-3) var(--deg-3),
+             var(--color-4) var(--deg-4),
+             var(--color-5) var(--deg-5));
+
+     position: absolute;
+
+     z-index: -999;
+     /* [迭代-v26] 提升到独立合成层 + 隔离重绘，让 conic-gradient 动画不触发全页主线程重绘 */
+     transform: translateZ(0);
+     will-change: contents;
+     contain: layout style paint;
+ }
+
+ /* 需要变换的svg的父容器 */
+ .scale-wrapper {
+     width: 100vw;
+     height: 100vh;
+     display: flex;
+     position: fixed;
+     justify-content: center;
+     align-items: center;
+     z-index: -99;
+
+ }
+
+ /* SVG容器，将在此容器上应用缩放变换 */
+ #lxbox {
+     /* 初始尺寸，可根据你的SVG设计尺寸调整 */
+     width: 440px;
+     height: 200px;
+     /* 确保缩放变换平滑 */
+     transition: transform 0.2s ease;
+    /* [迭代-v13] 将 lxbox 提升到独立合成层，避免入场动画时与 CSS transition 冲突导致卡顿 */
+    will-change: transform, opacity, rotate;
+ }
+#zcbox {
+     inset: 0;
+     position: fixed;
+     pointer-events: none;
+     z-index: 6;
+     /* [迭代-v18] zcbox 整体比例缩小，含弧形 tap，相对位置不变 */
+     transform: scale(0.9);
+     transform-origin: center;
+ }
+ /* SVG容器，将在此容器上应用缩放变换 实验*/
+#zcbox2 {
+     top: 50%;
+     left: 50%;
+     position: absolute;
+     width: 0;
+     height: 0;
+     opacity: 1;
+ }
+
+#zc-arc-tap-wrap {
+     position: absolute;
+     left: 50%;
+     top: 50%;
+     width: 0;
+     height: 0;
+     transform: translate(-50%, -50%);
+     mix-blend-mode: difference;
+     pointer-events: none;
+     z-index: 7;
+     will-change: width, height, opacity;
+}
+
+#zc-arc-tap {
+     width: 100%;
+     height: 100%;
+     display: block;
+     overflow: visible;
+     pointer-events: auto;
+     user-select: none;
+}
+
+#zc-arc-tap-hotspots {
+     position: absolute;
+     inset: 0;
+     pointer-events: auto;
+}
+
+.zc-arc-tap-button {
+     position: absolute;
+     left: 0;
+     top: 0;
+     width: 72px;
+     height: 56px;
+     border: 0;
+     padding: 0;
+     margin: 0;
+     background: transparent;
+     color: transparent;
+     font-size: 0;
+     line-height: 0;
+     pointer-events: auto;
+     cursor: pointer;
+     transform-origin: 50% 50%;
+}
+
+#zc-arc-tap .tab-hit {
+     fill: rgba(255, 255, 255, 0.001);
+     stroke: none;
+     cursor: pointer;
+     pointer-events: auto;
+}
+
+#zc-arc-tap .tab-char {
+     text-anchor: middle;
+     dominant-baseline: middle;
+     cursor: pointer;
+     pointer-events: auto;
+     transition: opacity 180ms ease;
+}
+
+#zc-arc-tap .tab-char-wrap {
+     transition: transform 180ms ease;
+     pointer-events: none;
+}
+
+#zc-arc-tap .indicator-icon {
+     pointer-events: none;
+}
+
+ .container {
+     display: grid;
+     grid-template-columns: repeat(2, 1fr);
+     grid-template-rows: repeat(2, 1fr);
+     width: 100vw;
+     height: 100vh;
+     z-index: 999;
+ }
+
+ .logo {
+     margin: 10px;
+     position: absolute;
+     width: 50vw;
+     height: 50vh;
+     mix-blend-mode: difference;
+     display: grid;
+     place-items: center;
+
+ }
+
+ .logo2 {
+     position: absolute;
+     display: grid;
+     place-items: center;
+     opacity: 0;
+ }
+
+.logo2>* {
+     grid-area: 1 / 1;
+}
+
+ .logo>* {
+     grid-area: 1 / 1;
+ }
+
+ .logo1svg {
+
+     width: 28vw;
+     height: 28vh;
+
+ }
+
+ .logo2svg {
+
+     width: 20vw;
+     height: 20vh;
+
+ }
+
+ .bt0 {
+     --weight-0: 300;
+     color: white;
+     mix-blend-mode: difference;
+     font-size: 14pt;
+     padding: 0.8rem;
+     letter-spacing: 0.2rem;
+     position: absolute;
+     font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+     font-optical-sizing: auto;
+     font-weight: var(--weight-0);
+     font-style: normal;
+
+
+
+ }
+
+ /* [迭代-v07] 统一可点击区域为食指光标，避免出现文本编辑光标 */
+ #hellologo,
+ .card[data-case-id],
+ .card-modal-close {
+     cursor: pointer;
+ }
+
+ /* [迭代-v07] 仅标题子元素显示食指光标，容器本身不变光标 */
+ #zc-title,
+ #al-title,
+ #lx-title {
+     pointer-events: auto !important;
+     cursor: pointer;
+ }
+
+ /* [迭代-v07] 动态显隐元素仅在可交互状态显示食指光标 */
+ #zc2[style*="pointer-events: auto"],
+ #al2[style*="pointer-events: auto"],
+ #lx2[style*="pointer-events: auto"],
+ #zc3[style*="pointer-events: auto"],
+ #al3[style*="pointer-events: auto"],
+ #lx3[style*="pointer-events: auto"],
+ #homelogo[style*="pointer-events: auto"],
+ #logo2[style*="pointer-events: auto"] {
+     cursor: pointer;
+ }
+
+ /* [迭代-v30] 字体子集化压缩：NotoSansSC 从 17MB→189KB（pyftsubset），保留 wght 100-900 可变轴；删除未使用的 NotoSerifSC 24MB */
+ @font-face {
+     font-family: 'NotoSansSC-VariableFont_wght';
+     src: url('fonts/NotoSansSC-VariableFont_wght.ttf') format('truetype-variations');
+     font-weight: 100 900;
+
+ }
+
+/* [迭代-v29] 移动端窄视口适配：全屏遮罩覆盖页面，显示 logo + 提示文案 + 复制网址按钮 */
+@media (max-width: 600px) {
+    body {
+        overflow: hidden;
+    }
+
+    body > *:not(.mobile-overlay) {
+        display: none !important;
+    }
+
+    .mobile-overlay {
+        display: flex !important;
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        background: rgb(7, 19, 31);
+    }
+
+    .mobile-overlay-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 40px;
+        padding: 32px;
+        text-align: center;
+    }
+
+    .mobile-logo {
+        width: min(28vw, 112px);
+        height: auto;
+        opacity: 0.9;
+        /* [迭代-v29] 坏灯泡闪灭动画：随机间歇闪烁 */
+        animation: bulb-flicker 6s infinite;
+    }
+
+    .mobile-message {
+        color: rgba(255, 255, 255, 0.82);
+        font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+        font-size: 14px;
+        font-weight: 300;
+        letter-spacing: 0.08em;
+        margin: 0;
+    }
+
+    .mobile-dots {
+        display: inline-block;
+        width: 1.2em;
+        text-align: left;
+    }
+
+    .mobile-copy-btn {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.88);
+        font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+        font-size: 14px;
+        font-weight: 300;
+        letter-spacing: 0.06em;
+        padding: 10px 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .mobile-copy-btn:active {
+        background: rgba(255, 255, 255, 0.18);
+        border-color: rgba(255, 255, 255, 0.55);
+    }
+
+    .mobile-copy-feedback {
+        color: rgba(255, 255, 255, 0.6);
+        font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+        font-size: 12px;
+        font-weight: 300;
+        opacity: 0;
+        transition: opacity 0.35s;
+    }
+
+    .mobile-copy-feedback.show {
+        opacity: 1;
+    }
+}
+
+ /* [迭代-v29] 移动端遮罩层：宽视口默认隐藏，窄视口由 media query 显示 */
+.mobile-overlay {
+    display: none;
+}
+
+.card {
+     transform-style: preserve-3d;
+     position: absolute;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     border-radius: 0.8rem;
+     transform-origin: 50% 105% 0px;
+     background-color: rgb(214, 214, 214);
+     background-size: cover;
+     background-position: center;
+     background-repeat: no-repeat;
+     box-shadow: 0 .125em .75em 1px rgba(0, 0, 0, .05),
+         0 0 .125em 1px rgba(0, 0, 0, .1);
+     overflow: hidden;
+ }
+
+ /* [迭代-v06] 卡片展开前仅显示自定义缩略图 */
+ .card[data-case-id] {
+     cursor: pointer;
+ }
+
+ .card[data-case-id]::after {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background: linear-gradient(180deg, rgba(8, 12, 20, 0.08) 0%, rgba(8, 12, 20, 0.48) 100%);
+     pointer-events: none;
+ }
+
+ .card[data-case-id]:focus-visible {
+     outline: 2px solid rgba(255, 255, 255, 0.9);
+     outline-offset: 2px;
+ }
+
+ .card--cap {
+     pointer-events: none !important;
+     background: transparent !important;
+ }
+
+ /* [迭代-v28] 卡片标题气泡：固定定位跟随鼠标，半透明磨砂黑底色 */
+ .card-tooltip {
+     position: fixed;
+     z-index: 9999;
+     pointer-events: none;
+     /* 半透明磨砂黑：58% 不透明黑底 + backdrop-filter 高斯模糊 */
+     background: rgba(18, 18, 18, 0.58);
+     backdrop-filter: blur(14px) saturate(1.4);
+     -webkit-backdrop-filter: blur(14px) saturate(1.4);
+     color: #ffffff;
+     /* 字体参照 bt0 标题：NotoSansSC 可变字重，默认 weight-0=300 */
+     font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+     font-optical-sizing: auto;
+     font-weight: 300;
+     font-style: normal;
+     font-size: 10.5pt;
+     letter-spacing: 0.08rem;
+     padding: 0.28rem 0.6rem;
+     border-radius: 0.35rem;
+     white-space: nowrap;
+     /* 隐藏状态：opacity 0 + blur + 略微缩放，与标题导航动效一致 */
+     opacity: 0;
+     filter: blur(6px);
+     transform: scale(0.92);
+     transform-origin: center center;
+     /* 渐显渐隐 + 模糊过渡，ease-out 进入 / ease-in 退出 */
+     transition:
+         opacity 0.28s ease-out,
+         filter 0.32s ease-out,
+         transform 0.28s ease-out;
+ }
+
+ /* 显示状态：清晰、正常尺寸，略微半透保留轻盈感 */
+ .card-tooltip.is-visible {
+     opacity: 0.88;
+     filter: blur(0px);
+     transform: scale(1);
+ }
+
+ /* 消退状态：用更快的 ease-in 配合模糊消失 */
+ .card-tooltip.is-hiding {
+     opacity: 0;
+     filter: blur(8px);
+     transform: scale(0.94);
+     transition:
+         opacity 0.22s ease-in,
+         filter 0.26s ease-in,
+         transform 0.22s ease-in;
+ }
+
+ /* [迭代-v25] 圆形卡片内 SVG 圆弧文字：覆盖整个圆形容器，字体参考 bt0 标题样式 */
+ .cap-circle-text {
+     position: absolute;
+     inset: 0;
+     width: 100%;
+     height: 100%;
+     overflow: visible;
+     pointer-events: none;
+     z-index: 2;
+     mix-blend-mode: difference;
+ }
+
+ .cap-circle-text text {
+     font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+     font-optical-sizing: auto;
+     font-weight: 600;
+     font-style: normal;
+     font-size: 14pt;
+     fill: #ffffff;
+     opacity: 0.3;
+     letter-spacing: 0.15rem;
+ }
+
+ /* [迭代-v25] 圆形卡片镭射渐变：双层 conic-gradient 不同速度旋转叠加，产生颜色比例持续变化 */
+ @property --holo-a1 {
+     syntax: '<angle>';
+     initial-value: 0deg;
+     inherits: false;
+ }
+ @property --holo-a2 {
+     syntax: '<angle>';
+     initial-value: 180deg;
+     inherits: false;
+ }
+
+ @keyframes holo-spin-a1 {
+     to { --holo-a1: 360deg; }
+ }
+ @keyframes holo-spin-a2 {
+     to { --holo-a2: -180deg; }
+ }
+
+ /* 仅 card--cap 内的圆形 div 应用镭射效果 */
+ .card--cap > div {
+     overflow: hidden;
+ }
+
+ .card--cap > div::before {
+     content: '';
+     position: absolute;
+     /* 放大区域避免旋转时露出边角 */
+     inset: -30%;
+     border-radius: inherit;
+     background:
+         conic-gradient(from var(--holo-a1), #102a40 0%, #102a40 28%, #453c34 38%, #453c34 65%, #102a40 75%, #102a40 100%),
+         conic-gradient(from var(--holo-a2), #453c34 0%, #453c34 15%, #102a40 28%, #102a40 58%, #453c34 70%, #453c34 100%);
+     background-blend-mode: overlay;
+     animation: holo-spin-a1 22s linear infinite,
+                holo-spin-a2 35s linear infinite;
+     z-index: 0;
+ }
+
+ .card--is-open {
+     opacity: 0 !important;
+     pointer-events: none !important;
+ }
+
+ .card>div {
+     transform-style: preserve-3d;
+     position: absolute;
+
+     width: 100%;
+     height: 100%;
+     background-position: center;
+     border-radius: inherit;
+ }
+
+ .card-layout-dialog {
+     width: 100vw;
+     height: 100vh;
+     max-width: none;
+     max-height: none;
+     border: none;
+     margin: 0;
+     padding: 0;
+     overflow: hidden;
+     background: transparent;
+ }
+
+ .card-layout-dialog::backdrop {
+     background: transparent;
+ }
+
+ .card-layout-dialog[open] {
+     display: grid;
+     place-items: center;
+ }
+
+ .card-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    opacity: 0;
+    /* [迭代-v06] 背景模糊效果，增强视觉层次感 */
+    backdrop-filter: blur(90px) saturate(80%);
+    /* 兼容旧版WebKit浏览器 */
+    -webkit-backdrop-filter: blur(90px) saturate(80%);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+ /* [迭代-v06] 弹窗面板采用图集流布局，标题栏叠加在内容上方 */
+ .card-modal-panel {
+     position: relative;
+     z-index: 1;
+     --modal-header-height: clamp(44px, 5.5vh, 56px);
+     /* [迭代-v19] iOS 风格：细窄滚动条 4px */
+     --modal-scrollbar-size: 4px;
+     width: min(74vw, 760px);
+     height: min(86vh, 860px);
+     /* [迭代-v21] 圆角加大，与悬浮胶囊标题栏和谐 */
+     border-radius: 1.75rem;
+     background: #030911;
+     box-shadow: 0 24px 56px rgba(0, 0, 0, 0.35);
+     overflow: hidden;
+     transform-origin: 50% 50%;
+ }
+
+ /* [迭代-v21] 标题栏悬浮：脱离面板边缘，上左右留间距，最大圆角 */
+ /* [迭代-v21] 默认透明无背景，滚动离开顶部后渐显毛玻璃 */
+ .card-modal-header {
+     position: absolute;
+     top: clamp(0.35rem, 0.8vw, 0.65rem);
+     right: clamp(0.35rem, 0.8vw, 0.65rem);
+     left: clamp(0.35rem, 0.8vw, 0.65rem);
+     z-index: 3;
+     height: var(--modal-header-height);
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     padding: 0 clamp(0.7rem, 1.6vw, 1rem);
+     border-radius: 999px;
+     background: transparent;
+     backdrop-filter: none;
+     -webkit-backdrop-filter: none;
+
+     opacity: 0;
+ }
+
+ /* [迭代-v06] 通过 difference 让标题在浅/深背景上自适应反色 */
+ /* [迭代-v20] 字体与其他站点标题统一：可变字重 + optical-sizing */
+ .card-modal-title {
+     margin: 0;
+     color: #ffffff;
+     mix-blend-mode: difference;
+     opacity: 0.8;
+     font-family: 'NotoSansSC-VariableFont_wght', sans-serif;
+     font-optical-sizing: auto;
+     font-weight: 350;
+     font-style: normal;
+     font-size: clamp(0.82rem, 1.5vw, 1.05rem);
+     letter-spacing: 0.1rem;
+     white-space: nowrap;
+     overflow: hidden;
+     text-overflow: ellipsis;
+     max-width: 74%;
+ }
+
+ /* [迭代-v21] 关闭按钮回归 flex 布局，header 居中后上下自然等距 */
+ .card-modal-close {
+     width: 1.7rem;
+     height: 1.7rem;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     border: none;
+     border-radius: 0;
+     background: transparent;
+     color: #ffffff;
+     mix-blend-mode: difference;
+     opacity: 0.8;
+     padding: 0;
+     cursor: pointer;
+     transition: transform 0.2s ease, opacity 0.2s ease;
+ }
+
+ .card-modal-close:hover {
+     transform: translateY(-1px) scale(1.05);
+     opacity: 0.8;
+ }
+
+ /* [迭代-v20] 关闭按钮 SVG 图标微调 */
+ .card-modal-close svg {
+     display: block;
+ }
+
+ .card-modal-close:focus-visible {
+     outline: 2px solid rgba(255, 255, 255, 0.9);
+     outline-offset: 2px;
+ }
+
+ .card-modal-scroll {
+     position: absolute;
+     /* [迭代-v06] 恢复从顶部开始，让标题栏继续对内容做高斯模糊 */
+     inset: 0;
+     overflow-y: auto;
+     overscroll-behavior: contain;
+     scrollbar-width: none;
+     -ms-overflow-style: none;
+     outline: none;
+     z-index: 2;
+ }
+
+ .card-modal-scroll::-webkit-scrollbar {
+     width: 0;
+     height: 0;
+ }
+
+ .card-modal-thumb-ghost {
+     position: absolute;
+     inset: 0;
+     z-index: 1;
+     opacity: 0;
+     pointer-events: none;
+     /* [迭代-v06] 收起时缩略图过渡层继承面板圆角，避免出现直角边 */
+     border-radius: inherit;
+     clip-path: inset(0 round var(--thumb-ghost-radius, 1.75rem));
+     overflow: hidden;
+     /* [迭代-v06] 关闭缩放时启用独立合成层，减少圆角直角伪影 */
+     transform: translateZ(0);
+     backface-visibility: hidden;
+     -webkit-backface-visibility: hidden;
+     will-change: transform, border-radius, clip-path;
+     mask-image: radial-gradient(white, black);
+     background-size: cover;
+     background-position: center;
+     background-repeat: no-repeat;
+ }
+
+ /* [迭代-v19] iOS 风格自定义滚动条：无可见轨道，自动淡入淡出 */
+ .card-modal-scrollbar {
+     position: absolute;
+     z-index: 4;
+     right: 0.3rem;
+     /* [迭代-v21] 滚动条起始位置跟随悬浮标题栏下沿 */
+     top: calc(var(--modal-header-height) + clamp(0.35rem, 0.8vw, 0.65rem) + 0.5rem);
+     bottom: 0.4rem;
+     width: var(--modal-scrollbar-size);
+     border-radius: 999px;
+     background: transparent;
+     border: none;
+     opacity: 0;
+     transition: opacity 0.5s ease 0.2s;
+ }
+
+ /* [迭代-v19] 滚动中或拖拽中保持可见 */
+ .card-modal-scrollbar.is-visible {
+     opacity: 1;
+     transition: opacity 0.15s ease 0s;
+ }
+
+ /* [迭代-v19] iOS 风格滑块：细窄 + mix-blend-mode 反色，亮/暗背景均可见 */
+ .card-modal-scrollbar-thumb {
+     position: absolute;
+     left: 0;
+     right: 0;
+     top: 0;
+     height: 56px;
+     border-radius: 999px;
+     background: rgba(255, 255, 255, 0.48);
+     mix-blend-mode: difference;
+     cursor: grab;
+ }
+
+ .card-modal-scrollbar-thumb:active {
+     cursor: grabbing;
+ }
+
+ /* [迭代-v19] 内容不足一屏时彻底隐藏滚动条 */
+ .card-modal-scrollbar.is-hidden {
+     display: none;
+ }
+
+ .card-modal-gallery {
+     opacity: 0;
+     /* [迭代-v21] 顶部留白 = 标题栏高度 + 悬浮间距 + 呼吸间隙 */
+     padding-top: calc(var(--modal-header-height) + clamp(0.35rem, 0.8vw, 0.65rem) + 0.5rem);
+ }
+
+ .card-modal-gallery-item {
+     width: 100%;
+     display: block;
+     /* [迭代-v27] 切片无缝拼接：清除 figure 默认 margin，避免黑线 */
+     margin: 0;
+ }
+
+ .card-modal-gallery-item img {
+     display: block;
+     width: 100%;
+     height: auto;
+     /* vertical-align: middle; */
+ }
+
+ .card-modal-gallery-item + .card-modal-gallery-item {
+     /* [迭代-v27] 切片无缝拼接，移除分隔线 */
+ }
+
+ @media (max-width: 600px) {
+     .card-modal-panel {
+         width: min(92vw, 440px);
+         height: min(88vh, 780px);
+     }
+ }
+
+ .huanzx {
+     position: relative;
+     display: inline-flex;
+     /* background-color: rgba(0, 0, 255, 0.286); */
+ }
+
+.zcyuan{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: rotate(var(--orbit-angle, 0deg)) translateY(calc(-1 * var(--orbit-radius, 0px)));
+    transform-origin: 0 0;
+    mix-blend-mode: difference;
+}
+.trapezoid-layer {
+            mix-blend-mode: difference !important;
+        }
+
+.zcbox-visuals {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.zc-copy-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: difference;
+    /* [迭代-v22] 文案层级置于圆和切线之上 */
+    z-index: 2;
+}
+
+.zc-copy {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: none;
+    color: rgba(255, 255, 255, 0.96);
+    font-size: 12px;
+    line-height: 1.55;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+    transform: translate(0, -50%);
+}
+
+.zc-copy--visible {
+    display: block;
+}
+
+.zc-copy--main {
+    width: 0;
+    height: 0;
+    transform: none;
+}
+
+.zc-copy-main-tag {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: max-content;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.zc-copy-main-body {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: max-content;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: pre;
+    line-height: 1.55;
+}
+
+/* [迭代-v12] 主文案改为围绕锚点的对角排版，让一三 / 二四切换真正镜像且不互相挤压 */
+.zc-copy-main-tag[data-horizontal="left"],
+.zc-copy-main-body[data-horizontal="left"] {
+    text-align: right;
+}
+
+.zc-copy-main-tag[data-horizontal="right"],
+.zc-copy-main-body[data-horizontal="right"] {
+    text-align: left;
+}
+
+.zc-copy-main-tag[data-horizontal="left"][data-vertical="top"],
+.zc-copy-main-body[data-horizontal="left"][data-vertical="top"] {
+    transform: translate(-100%, -100%);
+}
+
+.zc-copy-main-tag[data-horizontal="right"][data-vertical="top"],
+.zc-copy-main-body[data-horizontal="right"][data-vertical="top"] {
+    transform: translate(0, -100%);
+}
+
+.zc-copy-main-tag[data-horizontal="left"][data-vertical="bottom"],
+.zc-copy-main-body[data-horizontal="left"][data-vertical="bottom"] {
+    transform: translate(-100%, 0);
+}
+
+.zc-copy-main-tag[data-horizontal="right"][data-vertical="bottom"],
+.zc-copy-main-body[data-horizontal="right"][data-vertical="bottom"] {
+    transform: translate(0, 0);
+}
+
+.zc-copy--fixed {
+    width: max-content;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.zc-copy--fixed.zc-copy--visible {
+    display: flex;
+}
+
+.zc-center-guide {
+    position: absolute;
+    left: -8px;
+    top: -8px;
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+    display: none;
+}
+
+.zc-center-guide::before,
+.zc-center-guide::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.zc-center-guide::before {
+    left: 50%;
+    top: -10px;
+    width: 1px;
+    height: 36px;
+    transform: translateX(-50%);
+}
+
+.zc-center-guide::after {
+    left: -10px;
+    top: 50%;
+    width: 36px;
+    height: 1px;
+    transform: translateY(-50%);
+}
+
+.zc-orbit-guide-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+    transform-origin: 0 50%;
+    display: none;
+}
+
+.zc-solid-guide-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.12));
+    transform-origin: 0 50%;
+    display: none;
+}
+
+.zcyuan-shell {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--ring-size, 200px);
+    height: var(--ring-size, 200px);
+    transform: translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+/* [迭代-v12] 调试时给当前选中的圆一个舞台反馈，避免切换圆轨道时只有面板变化 */
+.zcyuan--debug-active .zcyuan-shell {
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.16));
+}
+
+ .xxyuan {
+     width: 100%;
+     height: 100%;
+     position: absolute;
+ }
+
+ /* SVG 覆盖层 */
+ .dash-border {
+     position: absolute;
+     inset: 0;
+     width: 100%;
+     height: 100%;
+     pointer-events: none;
+     
+     /* background-color: blue; */
+ }
+
+ /* 虚线描边核心 */
+ .dash-border circle {
+     fill: none;
+     stroke: rgba(255, 255, 255, var(--ring-opacity, 0.85));
+     stroke-width: var(--ring-stroke-width, 1.2);
+
+     /* 👇 自定义虚线 */
+     stroke-dasharray: 2.4 5.2;
+
+     /* 圆角虚线（高级感） */
+     stroke-linecap: round;
+ }
+
+.zxyuan-anchor {
+     position: absolute;
+     left: 50%;
+     top: 50%;
+     width: 0;
+     height: 0;
+     transform: rotate(180deg) translateY(calc(-1 * var(--solid-offset, 0px)));
+     transform-origin: 0 0;
+}
+
+.zxyuan {
+     width: var(--solid-size, 100px);
+     height: var(--solid-size, 100px);
+     border-radius: 50%;
+     opacity: var(--solid-opacity, 1);
+     background: #ffffff;
+     mix-blend-mode: difference;
+     position: absolute;
+     left: 0;
+     top: 0;
+     transform: translate(-50%, -50%) rotate(var(--solid-auto-spin, 0deg));
+     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.zcyuan--debug-active .zxyuan {
+     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 0 10px rgba(255, 255, 255, 0.08);
+}
+
+.orbit-icon {
+     position: absolute;
+     left: 0;
+     top: 0;
+     transform: translate(-50%, -50%) rotate(var(--icon-rotation, 0deg));
+     z-index: 3;
+     width: 24px;
+     height: 24px;
+     background-position: center;
+     background-repeat: no-repeat;
+     background-size: 100% 100%;
+     opacity: 0.6;
+     pointer-events: none;
+     user-select: none;
+}
+
+.orbit-icon[data-icon-type="plus"] {
+     width: 28px;
+     height: 28px;
+}
+
+.orbit-icon[data-icon-type="minus"] {
+     width: 28px;
+     height: 4px;
+}
+
+.zc-copy--debug-active {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.12));
+}
+
+.zcyuan-label {
+     position: absolute;
+     left: 50%;
+     top: calc(100% + 10px);
+     transform: translateX(-50%);
+     color: rgba(255, 255, 255, 0.72);
+     font-size: 11px;
+     letter-spacing: 0.12em;
+     text-transform: uppercase;
+     white-space: nowrap;
+     display: none;
+}
+
+body[data-zcbox-show-center="true"] .zc-center-guide,
+body[data-zcbox-show-orbit-vectors="true"] .zc-orbit-guide-line,
+body[data-zcbox-show-solid-vectors="true"] .zc-solid-guide-line,
+body[data-zcbox-show-labels="true"] .zcyuan-label {
+     display: block;
+}
+
+.zc-debug-panel {
+     position: fixed;
+     top: 12px;
+     right: 12px;
+     bottom: 12px;
+     width: min(320px, calc(100vw - 24px));
+     /* [迭代-v09] 调试窗限制在视口内，超出高度时内部滚动，避免控件被裁掉 */
+     padding: 12px;
+     border-radius: 18px;
+     background: rgba(9, 11, 18, 0.84);
+     border: 1px solid rgba(255, 255, 255, 0.14);
+     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+     backdrop-filter: blur(18px);
+     color: rgba(255, 255, 255, 0.92);
+     z-index: 30;
+     display: flex;
+     flex-direction: column;
+     max-height: calc(100svh - 24px);
+     overflow: hidden;
+}
+
+.zc-debug-panel--collapsed {
+     width: auto;
+     height: auto;
+     min-height: 0;
+     padding-bottom: 10px;
+     bottom: auto;
+     max-height: none;
+     overflow: visible;
+     display: block;
+}
+
+.zc-debug-toggle,
+.zc-debug-button,
+.zc-debug-content input,
+.zc-debug-content select {
+     font: inherit;
+}
+
+.zc-debug-toggle,
+.zc-debug-button {
+     border: 0;
+     border-radius: 999px;
+     padding: 0.55rem 0.95rem;
+     background: rgba(255, 255, 255, 0.1);
+     color: inherit;
+     cursor: pointer;
+}
+
+.zc-debug-toggle {
+     width: 100%;
+     text-align: left;
+     font-weight: 600;
+     letter-spacing: 0.08em;
+}
+
+.zc-debug-panel--collapsed .zc-debug-content {
+     display: none;
+}
+
+.zc-debug-content {
+     display: grid;
+     gap: 12px;
+     margin-top: 12px;
+     min-height: 0;
+     overflow: auto;
+     padding-right: 4px;
+}
+
+.zc-debug-section {
+     display: grid;
+     gap: 8px;
+     padding-top: 8px;
+     border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zc-debug-section-toggle {
+     width: 100%;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     gap: 12px;
+     border: 0;
+     padding: 0;
+     margin: 0;
+     background: transparent;
+     color: inherit;
+     cursor: pointer;
+     text-align: left;
+}
+
+.zc-debug-section-toggle::after {
+     content: '−';
+     flex: 0 0 auto;
+     color: rgba(255, 255, 255, 0.56);
+     font-size: 18px;
+     line-height: 1;
+}
+
+.zc-debug-section[data-collapsed="true"] .zc-debug-section-toggle::after {
+     content: '+';
+}
+
+.zc-debug-section-title {
+     font-size: 12px;
+     letter-spacing: 0.16em;
+     text-transform: uppercase;
+     color: rgba(255, 255, 255, 0.55);
+}
+
+.zc-debug-section-body {
+     display: grid;
+     gap: 8px;
+}
+
+.zc-debug-section[data-collapsed="true"] .zc-debug-section-body {
+     display: none;
+}
+
+.zc-debug-hint {
+     margin: 0;
+     font-size: 11px;
+     line-height: 1.5;
+     color: rgba(255, 255, 255, 0.58);
+}
+
+.zc-debug-row {
+     display: flex;
+     gap: 8px;
+}
+
+.zc-debug-orbit-picker {
+     display: grid;
+     grid-template-columns: repeat(3, minmax(0, 1fr));
+     gap: 8px;
+}
+
+.zc-debug-orbit-button {
+     border: 0;
+     border-radius: 999px;
+     padding: 0.55rem 0.6rem;
+     background: rgba(255, 255, 255, 0.08);
+     color: rgba(255, 255, 255, 0.68);
+     cursor: pointer;
+     transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.zc-debug-orbit-button[aria-selected="true"] {
+     background: rgba(255, 255, 255, 0.16);
+     color: rgba(255, 255, 255, 0.96);
+     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.zc-debug-orbit-active {
+     font-size: 12px;
+     color: rgba(255, 255, 255, 0.62);
+     letter-spacing: 0.06em;
+}
+
+.zc-debug-row > * {
+     flex: 1;
+}
+
+.zc-debug-field {
+     display: grid;
+     gap: 6px;
+}
+
+.zc-debug-field > span {
+     font-size: 12px;
+     color: rgba(255, 255, 255, 0.72);
+}
+
+.zc-debug-field > output {
+     font-size: 12px;
+     color: rgba(255, 255, 255, 0.55);
+}
+
+.zc-debug-content label {
+     font-size: 13px;
+}
+
+.zc-debug-content input[type="range"] {
+     width: 100%;
+}
+
+.zc-debug-content input[type="text"],
+.zc-debug-content textarea,
+.zc-debug-content select {
+     width: 100%;
+     border-radius: 12px;
+     border: 1px solid rgba(255, 255, 255, 0.12);
+     background: rgba(255, 255, 255, 0.06);
+     color: inherit;
+     padding: 10px 12px;
+}
+
+.zc-keyframe-list {
+     width: 100%;
+     min-height: 92px;
+     background: rgba(255, 255, 255, 0.06);
+     color: inherit;
+     border: 1px solid rgba(255, 255, 255, 0.12);
+     border-radius: 12px;
+     padding: 8px;
+}
+
+.zc-json-output {
+     width: 100%;
+     min-height: 180px;
+     resize: vertical;
+     border-radius: 12px;
+     border: 1px solid rgba(255, 255, 255, 0.12);
+     background: rgba(255, 255, 255, 0.06);
+     color: inherit;
+     padding: 10px 12px;
+     font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.zc-json-output--editable {
+     min-height: 260px;
+     background: rgba(8, 8, 12, 0.88);
+}
+
+.zc-copy-textarea {
+     min-height: 112px;
+     resize: vertical;
+     font: 12px/1.5 'NotoSansSC-VariableFont_wght', sans-serif;
+}
+
+.zc-debug-status {
+     min-height: 18px;
+     font-size: 11px;
+     line-height: 1.4;
+     color: rgba(255, 255, 255, 0.68);
+}
+
+.zc-debug-status[data-status="error"] {
+     color: #ff8f8f;
+}
+
+.zc-debug-status[data-status="success"] {
+     color: #9ae6b4;
+}
+
+@media (max-width: 640px) {
+     .zc-debug-panel {
+         left: 12px;
+         right: 12px;
+         top: 12px;
+         bottom: 12px;
+         width: auto;
+     }
+}
+
+
+/* [迭代-v16] 关于本站入口已移除 */
+
+@media (max-width: 640px) {
+    .about-link {
+        bottom: 16px;
+        right: 14px;
+        font-size: 10px;
+        padding: 5px 12px;
+    }
+}
+
+/* [迭代-v29] 移动端 logo 坏灯泡闪灭动画：模拟灯丝接触不良的随机间歇闪烁，间隔拉开 */
+@keyframes bulb-flicker {
+    0%   { opacity: 0.9; }
+    1%   { opacity: 0.15; }
+    2%   { opacity: 0.9; }
+    3%   { opacity: 0.2; }
+    4%   { opacity: 0.85; }
+    6%   { opacity: 0.05; }
+    7%   { opacity: 0.08; }
+    8%   { opacity: 0.9; }
+    30%  { opacity: 0.9; }
+    31%  { opacity: 0.1; }
+    32%  { opacity: 0.9; }
+    33%  { opacity: 0.15; }
+    34%  { opacity: 0.88; }
+    36%  { opacity: 0.04; }
+    37%  { opacity: 0.06; }
+    38%  { opacity: 0.9; }
+    60%  { opacity: 0.9; }
+    61%  { opacity: 0.2; }
+    62%  { opacity: 0.88; }
+    64%  { opacity: 0.05; }
+    65%  { opacity: 0.07; }
+    66%  { opacity: 0.9; }
+    85%  { opacity: 0.9; }
+    86%  { opacity: 0.12; }
+    87%  { opacity: 0.9; }
+    88%  { opacity: 0.06; }
+    89%  { opacity: 0.85; }
+    100% { opacity: 0.9; }
+}
